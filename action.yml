@@ -1,0 +1,14 @@
+name: 'Release Node Package'
+description: 'This is an action to Release a Node Package'
+inputs:
+  release-version:
+    description: 'Release Version'
+    required: true
+  release-notes:
+    description: 'Release Notes (Will be added on the annotated tag)'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.release-version }}
