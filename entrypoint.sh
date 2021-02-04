@@ -1,1 +1,1 @@
-node updatePackageVersion.js
+node updatePackageVersion.js $1
