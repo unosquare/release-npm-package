@@ -1,0 +1,25 @@
+{
+    "name": "MyFirstAction",
+    "version": "1.4.2",
+    "description": "This action prints \"Hello World\" or \"Hello\" + the name of a person to greet to the log.",
+    "main": "index.js",
+    "dependencies": {
+        "@actions/core": "^1.2.6",
+        "@actions/github": "^4.0.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/JCorrea13/MyFirstAction.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/JCorrea13/MyFirstAction/issues"
+    },
+    "homepage": "https://github.com/JCorrea13/MyFirstAction#readme"
+}

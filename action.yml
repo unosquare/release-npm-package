@@ -1,0 +1,25 @@
+# action.yml
+name: 'Action Type'
+description: 'This action releases a Node Package or Merge Back a Release'
+inputs:
+  action-type:
+    description: 'Action Type ( Release | Back )'
+    required: true
+    default: 'Release'
+  github_token:
+    description: 'Token used to authenticate with GitHub when performing the merge command.'
+    required: false
+    default: ${{ github.token }}
+  sprint:
+    description: 'Sprint Number'
+    required: true
+  prod-branch:
+    description: 'Prod Branch Name'
+    required: true
+    default: 'master'
+  release-notes:
+    description: 'Tag Message'
+    required: true
+runs:
+  using: node12
+  main: index.js
