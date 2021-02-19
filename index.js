@@ -11,20 +11,25 @@ const prodBranch = core.getInput("prod-branch");
 
 const gh = ghUtilities.getUtilities(token);
 
-const pushReleaseVersion = async () => {
-  console.log("::group::Push Release Version");
-  const choreBranchName = `Chore/Sprint${sprint}`;
+const mergeBranch = async (choreBranchName) => {
   const defaultBranchName = await gh.getDefaultBranch();
-  console.log(`Default brach ${defaultBranchName} - Branch ${choreBranchName}`);
-  
-  const files = await gh.getFilesThatChanged(prodBranch, defaultBranchName);
+
+  const sourceBranch =
+    actionType == actions.types.Release ? prodBranch : defaultBranchName;
+  const headBranch =
+    actionType == actions.types.Release ? defaultBranchName : prodBranch;
+
+  console.log(`Source brach ${sourceBranch} - New Branch ${choreBranchName}`);
+
+  const files = await gh.getFilesThatChanged(sourceBranch, headBranch);
+  console.log(`Files that changed ${files.length}`);
 
   if (files.length == 0) {
     throw new Error("No changes to be merged");
   }
 
-  await gh.createNewBranch(prodBranch, choreBranchName);
-  await gh.mergeBranches(choreBranchName, defaultBranchName);
+  await gh.createNewBranch(sourceBranch, choreBranchName);
+  await gh.mergeBranches(choreBranchName, headBranch);
 
   const packageJson = await gh.getContent(choreBranchName, "package.json");
   const newJson = ops.updateVersion(packageJson.content, actionType);
@@ -40,6 +45,14 @@ const pushReleaseVersion = async () => {
   const merge = await gh.mergePR(pr.number);
   await gh.deleteBranch(choreBranchName);
 
+  return { merge, newJson };
+};
+
+const pushReleaseVersion = async () => {
+  console.log("::group::Push Release Version");
+  const choreBranchName = `Chore/Sprint${sprint}`;
+  const { merge, newJson } = await mergeBranch(choreBranchName);
+
   await gh.createTag(merge.sha, sprint, releaseNotes);
   console.log("::endgroup::");
 
@@ -47,7 +60,12 @@ const pushReleaseVersion = async () => {
 };
 
 const pushMergeBackVersion = async () => {
-  throw new Error("Not Implemented");
+  console.log("::group::Merge Back Version");
+  const choreBranchName = `Chore/MergeBackSprint${sprint}`;
+  const { _, newJson } = await mergeBranch(choreBranchName);
+  console.log("::endgroup::");
+
+  return newJson.version;
 };
 
 const action =
