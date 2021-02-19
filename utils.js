@@ -1,157 +1,159 @@
-const github = require('@actions/github');
+const github = require("@actions/github");
 
 const getUtilities = (token) => {
-    const octokit = github.getOctokit(token);
-    const repo = github.context.repo;
+  const octokit = github.getOctokit(token);
+  const repo = github.context.repo;
 
-    const createTag = async (objectSha, sprint, releaseNotes) => {
-        const tag = await octokit.git.createTag({
-            owner: repo.owner,
-            repo: repo.repo,
-            object: objectSha,
-            message: releaseNotes,
-            tag: `${sprint}`,
-            type: 'commit',
-        });
+  const createTag = async (objectSha, sprint, releaseNotes) => {
+    const tag = await octokit.git.createTag({
+      owner: repo.owner,
+      repo: repo.repo,
+      object: objectSha,
+      message: releaseNotes,
+      tag: `${sprint}`,
+      type: "commit",
+    });
 
-        await octokit.git.createRef({
-            owner: repo.owner,
-            repo: repo.repo,
-            sha: tag.data.object.sha,
-            ref: `refs/tags/${sprint}`
-        });
+    await octokit.git.createRef({
+      owner: repo.owner,
+      repo: repo.repo,
+      sha: tag.data.object.sha,
+      ref: `refs/tags/${sprint}`,
+    });
 
-        await octokit.repos.createRelease({
-            owner: repo.owner,
-            repo: repo.repo,
-            tag_name: sprint,
-            name: `Release ${sprint}`,
-            body: releaseNotes
-        });
-    };
+    await octokit.repos.createRelease({
+      owner: repo.owner,
+      repo: repo.repo,
+      tag_name: sprint,
+      name: `Release ${sprint}`,
+      body: releaseNotes,
+    });
+  };
 
-    const getDefaultBranch = async () => {
-        const repository = await octokit.repos.get({
-            owner: repo.owner,
-            repo: repo.repo
-        });
-    
-        return repository.data.default_branch;
-    };
+  const getDefaultBranch = async () => {
+    const repository = await octokit.repos.get({
+      owner: repo.owner,
+      repo: repo.repo,
+    });
 
-    const createNewBranch = async (baseBranch, newBranchName) => {
-        const newRef = `refs/heads/${newBranchName}`;
+    return repository.data.default_branch;
+  };
 
-        const masterBranch = await octokit.git.getRef({
-            owner: repo.owner,
-            repo: repo.repo,
-            ref: `heads/${baseBranch}`
-        });
-        
-        await octokit.git.createRef({
-            owner: repo.owner,
-            repo: repo.repo,
-            ref: newRef,
-            sha: masterBranch.data.object.sha
-        });
-    };
+  const createNewBranch = async (baseBranch, newBranchName) => {
+    const newRef = `refs/heads/${newBranchName}`;
 
-    const mergeBranches = async (baseBranch, headBranch) => {
-        const merge = await octokit.repos.merge({
-            owner: repo.owner,
-            repo: repo.repo,
-            base: baseBranch,
-            head: headBranch,
-            commit_message: `Merging ${headBranch}`
-        });
+    const masterBranch = await octokit.git.getRef({
+      owner: repo.owner,
+      repo: repo.repo,
+      ref: `heads/${baseBranch}`,
+    });
 
-        return merge.data;
-    }
+    await octokit.git.createRef({
+      owner: repo.owner,
+      repo: repo.repo,
+      ref: newRef,
+      sha: masterBranch.data.object.sha,
+    });
+  };
 
-    const getFilesThatChanged = async (baseBranc, headBranch) => {
-        const result = await octokit.repos.compareCommits({
-            owner: repo.owner,
-            repo: repo.repo,
-            base: baseBranc,
-            head: headBranch
-        });
+  const mergeBranches = async (baseBranch, headBranch) => {
+    const merge = await octokit.repos.merge({
+      owner: repo.owner,
+      repo: repo.repo,
+      base: baseBranch,
+      head: headBranch,
+      commit_message: `Merging ${headBranch}`,
+    });
 
-        return result.data.files;
-    }
+    return merge.data;
+  };
 
-    const createPR = async (baseBranch, headBranch) => {
-        const pr = await octokit.pulls.create({
-            owner: repo.owner,
-            repo: repo.repo,
-            head: headBranch,
-            base: baseBranch,
-            title: headBranch
-          });
+  const getFilesThatChanged = async (baseBranc, headBranch) => {
+    const result = await octokit.repos.compareCommits({
+      owner: repo.owner,
+      repo: repo.repo,
+      base: baseBranc,
+      head: headBranch,
+    });
 
-          return pr.data;
-    };
+    return result.data.files;
+  };
 
-    const mergePR = async (prNumber) => {
-        const merge = await octokit.pulls.merge({
-            owner: repo.owner,
-            repo: repo.repo,
-            pull_number: prNumber
-        });
+  const createPR = async (baseBranch, headBranch) => {
+    const pr = await octokit.pulls.create({
+      owner: repo.owner,
+      repo: repo.repo,
+      head: headBranch,
+      base: baseBranch,
+      title: headBranch,
+    });
 
-        return merge.data;
-    }
+    return pr.data;
+  };
 
-    const closePR = (prNumber) =>
-        octokit.pulls.update({
-            owner: repo.owner,
-            repo: repo.repo,
-            pull_number: prNumber,
-            state: 'closed'
-        });
+  const mergePR = async (prNumber) => {
+    const merge = await octokit.pulls.merge({
+      owner: repo.owner,
+      repo: repo.repo,
+      pull_number: prNumber,
+    });
 
-    const deleteBranch = (branchName) =>
-        octokit.git.deleteRef({
-            owner: repo.owner,
-            repo: repo.repo,
-            ref: `heads/${branchName}`
-        });
+    return merge.data;
+  };
 
-    const getContent = async (branch, path) => {
-        const ref = `refs/heads/${branch}`;
-        const packageJson = await octokit.repos.getContent({ 
-            owner: repo.owner,
-            repo: repo.repo,
-            path: path,
-            ref: ref
-        });
+  const closePR = (prNumber) =>
+    octokit.pulls.update({
+      owner: repo.owner,
+      repo: repo.repo,
+      pull_number: prNumber,
+      state: "closed",
+    });
 
-        return packageJson.data;
-    };
+  const deleteBranch = (branchName) =>
+    octokit.git.deleteRef({
+      owner: repo.owner,
+      repo: repo.repo,
+      ref: `heads/${branchName}`,
+    });
 
-    const commitContent = (path, message, content, sha, branch) =>
-        octokit.repos.createOrUpdateFileContents({
-            owner: repo.owner,
-            repo: repo.repo,
-            path: path,
-            message: message,
-            content: content,
-            sha: sha,
-            branch: branch
-        });
+  const getContent = async (branch, path) => {
+    console.log(`Fetching ${path}`);
 
-    return {
-        createTag,
-        getDefaultBranch,
-        createNewBranch,
-        mergeBranches,
-        createPR,
-        deleteBranch,
-        getContent,
-        commitContent,
-        mergePR,
-        closePR,
-        getFilesThatChanged
-    };
+    const ref = `refs/heads/${branch}`;
+    const packageJson = await octokit.repos.getContent({
+      owner: repo.owner,
+      repo: repo.repo,
+      path: path,
+      ref: ref,
+    });
+
+    return packageJson.data;
+  };
+
+  const commitContent = (path, message, content, sha, branch) =>
+    octokit.repos.createOrUpdateFileContents({
+      owner: repo.owner,
+      repo: repo.repo,
+      path: path,
+      message: message,
+      content: content,
+      sha: sha,
+      branch: branch,
+    });
+
+  return {
+    createTag,
+    getDefaultBranch,
+    createNewBranch,
+    mergeBranches,
+    createPR,
+    deleteBranch,
+    getContent,
+    commitContent,
+    mergePR,
+    closePR,
+    getFilesThatChanged,
+  };
 };
 
 exports.getUtilities = getUtilities;

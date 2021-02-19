@@ -12,9 +12,11 @@ const prodBranch = core.getInput("prod-branch");
 const gh = ghUtilities.getUtilities(token);
 
 const pushReleaseVersion = async () => {
+  console.log("::group::Push Release Version");
   const choreBranchName = `Chore/Sprint${sprint}`;
   const defaultBranchName = await gh.getDefaultBranch();
-
+  console.log(`Default brach ${defaultBranchName} - Branch ${choreBranchName}`);
+  
   const files = await gh.getFilesThatChanged(prodBranch, defaultBranchName);
 
   if (files.length == 0) {
@@ -39,6 +41,8 @@ const pushReleaseVersion = async () => {
   await gh.deleteBranch(choreBranchName);
 
   await gh.createTag(merge.sha, sprint, releaseNotes);
+  console.log("::endgroup::");
+
   return newJson.version;
 };
 
