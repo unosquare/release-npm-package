@@ -1,11 +1,12 @@
 {
-    "name": "MyFirstAction",
-    "version": "1.4.2",
-    "description": "This action prints \"Hello World\" or \"Hello\" + the name of a person to greet to the log.",
+    "name": "release-npm-package",
+    "version": "3.0.0",
+    "description": "Release Npm Package.",
     "main": "index.js",
     "dependencies": {
         "@actions/core": "^1.2.6",
-        "@actions/github": "^4.0.0"
+        "@actions/github": "^4.0.0",
+        "semver": "^7.3.4"
     },
     "devDependencies": {},
     "scripts": {
