@@ -25,9 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - uses: Unosquare/release-npm-package@v3
+      - uses: unosquare/release-npm-package@v6
         name: Getting Release Version
         with:
           action-type: ${{ github.event.inputs.action-type }}
