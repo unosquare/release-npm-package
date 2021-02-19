@@ -33,6 +33,8 @@ const mergeBranch = async (choreBranchName) => {
 
   const packageJson = await gh.getContent(choreBranchName, "package.json");
   const newJson = ops.updateVersion(packageJson.content, actionType);
+  console.log(`Bumping version`);
+
   await gh.commitContent(
     "package.json",
     `Updating Package Version to ${newJson.version}`,
@@ -41,7 +43,8 @@ const mergeBranch = async (choreBranchName) => {
     choreBranchName
   );
 
-  const pr = await gh.createPR(prodBranch, choreBranchName);
+  console.log(`Creating PR`);
+  const pr = await gh.createPR(sourceBranch, choreBranchName);
   const merge = await gh.mergePR(pr.number);
   await gh.deleteBranch(choreBranchName);
 
