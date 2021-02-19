@@ -6,7 +6,7 @@ inputs:
     description: 'Action Type ( Release | Back )'
     required: true
     default: 'Release'
-  github_token:
+  github-token:
     description: 'Token used to authenticate with GitHub when performing the merge command.'
     required: false
     default: ${{ github.token }}
@@ -20,6 +20,8 @@ inputs:
   release-notes:
     description: 'Tag Message'
     required: true
+  repo:
+    description: 'If empty, current repo. Format @org/repo.'
 runs:
   using: node12
   main: index.js

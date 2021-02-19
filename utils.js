@@ -1,8 +1,13 @@
 const github = require("@actions/github");
 
-const getUtilities = (token) => {
+const getUtilities = (repoName, token) => {
   const octokit = github.getOctokit(token);
-  const repo = github.context.repo;
+  const repo =
+    repoName && repoName.includes("/")
+      ? { owner: repoName.split("/")[0], repo: repoName.split("/")[1] }
+      : github.context.repo;
+
+  console.log(`Init Repo ${repo.owner}/${repo.repo}`);
 
   const createTag = async (objectSha, sprint, releaseNotes) => {
     const tag = await octokit.git.createTag({

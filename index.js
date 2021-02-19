@@ -4,12 +4,13 @@ const ghUtilities = require("./utils");
 const actions = require("./actions");
 
 const actionType = core.getInput("action-type");
-const token = core.getInput("github_token");
+const token = core.getInput("github-token");
 const sprint = core.getInput("sprint");
 const releaseNotes = core.getInput("release-notes");
 const prodBranch = core.getInput("prod-branch");
+const repo = core.getInput("repo");
 
-const gh = ghUtilities.getUtilities(token);
+const gh = ghUtilities.getUtilities(repo, token);
 
 const mergeBranch = async (choreBranchName) => {
   const defaultBranchName = await gh.getDefaultBranch();
