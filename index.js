@@ -83,6 +83,6 @@ action()
     core.setOutput("success", true);
   })
   .catch((err) => {
-    core.error(err);
+    core.setFailed(err);
     core.setOutput("success", false);
   });
