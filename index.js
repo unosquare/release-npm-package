@@ -47,7 +47,9 @@ const mergeBranch = async (choreBranchName) => {
   console.log(`Creating PR`);
   const pr = await gh.createPR(sourceBranch, choreBranchName);
   const merge = await gh.mergePR(pr.number);
-  await gh.deleteBranch(choreBranchName);
+  
+  if (actionType == actions.types.Release)
+    await gh.deleteBranch(choreBranchName);
 
   return { merge, newJson };
 };
